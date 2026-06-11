@@ -36,6 +36,9 @@ jobs:
           context: .
           push: true
           tags: ${{ env.REGISTRY }}/${{ steps.image.outputs.lowercase_image_name }}:latest
+          build-args: |
+            SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+            SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
 
   deploy:
     needs: build-and-push
