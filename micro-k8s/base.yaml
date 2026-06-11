@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: queuecure
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: queuecure-config
+  namespace: queuecure
+data:
+  SUPABASE_URL: "https://your-project.supabase.co"
+  REDIS_URL: "redis://redis:6379" # This will point to internal redis service or elastic-cache endpoint
+  AUTH_SERVICE_URL: "http://auth-service:3002"
+  HOSPITAL_SERVICE_URL: "http://hospital-service:3001"
+  QUEUE_SERVICE_URL: "http://queue-service:3003"
+  TRIAGE_SERVICE_URL: "http://triage-service:3004"
