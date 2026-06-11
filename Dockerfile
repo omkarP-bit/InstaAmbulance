@@ -12,13 +12,13 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Add build-time arguments
+# Add build-time arguments (do not persist as ENV)
 ARG SUPABASE_URL
 ARG SUPABASE_ANON_KEY
 ARG SUPABASE_SERVICE_ROLE_KEY
-ENV SUPABASE_URL=$SUPABASE_URL
-ENV SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
-ENV SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_ROLE_KEY
+
+# Skip Redis connection during build
+ENV SKIP_REDIS_CONNECT=true
 
 RUN npm run build
 
