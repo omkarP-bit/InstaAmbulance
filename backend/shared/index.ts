@@ -1,8 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import 'dotenv/config';
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';

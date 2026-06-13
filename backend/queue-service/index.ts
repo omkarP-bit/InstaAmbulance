@@ -1,12 +1,12 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
 import Redis from 'ioredis';
 import { CompactSign } from 'jose';
+import WebSocket from 'ws';
 
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3003;
@@ -17,9 +17,16 @@ app.use(express.json());
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
+const supabase = createClient(supabaseUrl, supabaseServiceKey, {
+  realtime: {
+    transport: WebSocket,
+  },
+});
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+const redis = new Redis(process.env.REDIS_URL || '', {
+  tls: process.env.REDIS_URL?.startsWith('rediss://') ? {} : undefined,
+  retryStrategy: (times) => Math.min(times * 50, 2000),
+});
 
 const secretString = process.env.NEXTAUTH_SECRET || "fallback-secret-for-signing-tokens-that-is-at-least-32-chars";
 const SECRET = crypto.subtle.importKey(
@@ -52,7 +59,10 @@ app.get('/queue/stream', (req, res) => {
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
 
-  const subRedis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+  const subRedis = new Redis(process.env.REDIS_URL || '', {
+    tls: process.env.REDIS_URL?.startsWith('rediss://') ? {} : undefined,
+    retryStrategy: (times) => Math.min(times * 50, 2000),
+  });
   
   res.write(`data: ${JSON.stringify({ type: 'CONNECTED' })}\n\n`);
 
@@ -91,7 +101,7 @@ app.post('/tokens', async (req, res) => {
       .order('token_number', { ascending: false })
       .limit(1);
 
-    const nextTokenNumber = currentTokens && currentTokens.length > 0 ? currentTokens[0].token_number + 1 : 1;
+    const nextTokenNumber = (currentTokens?.[0]?.token_number ?? 0) + 1;
 
     // 2. Get doctor info for ETS (TC-015: Availability check)
     const { data: doctor } = await supabase

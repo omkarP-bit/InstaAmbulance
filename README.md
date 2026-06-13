@@ -24,7 +24,7 @@ graph TD
     G --> E[Queue Service :3003]
     G --> F[Triage Service :3004]
     
-    C & D & E --> DB[(Supabase - Postgres)]
+    C & D & E --> DB[(Supabase Cloud)]
     E <--> R[(AWS Elasticache - Redis)]
     F --> AI[Groq/Claude AI API]
     
@@ -119,6 +119,9 @@ The system has been validated against 20 critical Indian hospital scenarios:
 ## 🛠 Deployment
 
 ### Local (Docker Compose)
+**Important:** Since we are using AWS Elasticache and no local Redis container, you **MUST** update the `REDIS_URL` in your `.env` file to your actual Elasticache endpoint. 
+*Note: Using `localhost` or `127.0.0.1` will fail inside Docker.*
+
 ```bash
 docker-compose up --build
 ```
@@ -127,7 +130,6 @@ docker-compose up --build
 ```bash
 # Apply Base Namespace & Configs
 kubectl apply -f micro-k8s/base.yaml
-kubectl apply -f micro-k8s/redis.yaml
 
 # Apply Microservices
 kubectl apply -f micro-k8s/services.yaml

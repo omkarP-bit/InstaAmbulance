@@ -1,10 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import * as dotenv from 'dotenv';
+import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
+import WebSocket from 'ws';
 
-dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -15,8 +15,11 @@ app.use(express.json());
 
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
-
+const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  realtime: {
+    transport: WebSocket,
+  },
+});
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', service: 'hospital-service' });
 });

@@ -7,9 +7,9 @@ RUN npm install
 
 COPY . .
 
-# We'll use ts-node for now to keep it simple, or compile
-RUN npm install -g ts-node typescript
+# Install tsx for running typescript directly in ESM mode
+RUN npm install -g tsx
 
 EXPOSE 3004
 
-CMD ["ts-node", "index.ts"]
+CMD ["tsx", "index.ts"]
